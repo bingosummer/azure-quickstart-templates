@@ -26,7 +26,8 @@
         "AzureCloud",
         "AzureChinaCloud",
         "AzureUSGovernment",
-        "AzureGermanCloud"
+        "AzureGermanCloud",
+        "AzureStack"
       ],
       "metadata": {
         "description": "Different environments in Azure. Choose AzureCloud for Global Azure, choose AzureChinaCloud for Azure China Cloud, choose AzureUSGovernment for Azure Government, choose AzureGermanCloud for German cloud."
@@ -92,6 +93,20 @@
       "metadata": {
         "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
       }
+    },
+    "azureStackDomain": {
+      "type": "string",
+      "defaultValue": "NotApplicableIfEnvironmentIsNotAzureStack",
+      "metadata": {
+        "description": "Domain of the Azure Stack deployment."
+      }
+    },
+    "azureStackResource": {
+      "type": "string",
+      "defaultValue": "NotApplicableIfEnvironmentIsNotAzureStack",
+      "metadata": {
+        "description": "Resource of the Azure Stack deployment. Use Azure Powershell command: (Invoke-RestMethod -Uri https://api.azurestack.local/metadata/endpoints?api-version=1.0 -Method Get).authentication.audiences[0]"
+      }
     }
   },
   "variables": {
@@ -117,7 +132,7 @@
     "devboxPrivateIPAddress": "10.0.0.100",
     "imagePublisher": "Canonical",
     "imageOffer": "UbuntuServer",
-    "ubuntuOSVersion": "14.04.5-LTS",
+    "ubuntuOSVersion": "14.04.3-LTS",
     "sshKeyPath": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
 
     "baseUriAzureCloud": "[parameters('_artifactsLocation')]",
@@ -131,6 +146,7 @@
       "[uri(variables('baseUriAzureCloud'), 'manifests/bosh.yml')]",
       "[uri(variables('baseUriAzureCloud'), 'manifests/single-vm-cf.yml')]",
       "[uri(variables('baseUriAzureCloud'), 'manifests/multiple-vm-cf.yml')]",
+      "[uri(variables('baseUriAzureCloud'), 'manifests/multiple-vm-cf-on-azurestack.yml')]",
       "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.23.1/cf-cli-installer_6.23.1_x86-64.deb",
       "https://storage.googleapis.com/golang/go1.7.3.linux-amd64.tar.gz",
       "https://github.com/square/certstrap/archive/v1.0.1.tar.gz"
@@ -138,7 +154,7 @@
     "filesToDownloadAzureCloud": "[variables('filesToDownloadAzure')]",
     "filesToDownloadAzureUSGovernment": "[variables('filesToDownloadAzure')]",
     "filesToDownloadAzureGermanCloud": "[variables('filesToDownloadAzure')]",
-
+    "filesToDownloadAzureStack": "[variables('filesToDownloadAzureCloud')]",
     "baseUriAzureChinaCloud": "https://cloudfoundry.blob.core.chinacloudapi.cn/bosh-setup/",
     "templateVersion": "v2-6-1",
     "baseUriAzureChinaCloudWithVersion": "[concat(variables('baseUriAzureChinaCloud'), variables('templateVersion'), '/')]",
@@ -157,13 +173,13 @@
       "https://mirror.azure.cn/go/go1.7.3.linux-amd64.tar.gz",
       "https://mirror.azure.cn/square/certstrap/v1.0.1/v1.0.1.tar.gz"
     ],
-
     "filesToDownload": "[variables(concat('filesToDownload', parameters('environment')))]",
 
     "coreUriAzureCloud": "core.windows.net",
     "coreUriAzureChinaCloud": "core.chinacloudapi.cn",
     "coreUriAzureUSGovernment": "core.usgovcloudapi.net",
     "coreUriAzureGermanCloud": "core.cloudapi.de",
+    "coreUriAzureStack": "[parameters('azureStackDomain')]",
     "coreUri": "[variables(concat('coreUri', parameters('environment')))]",
 
     "environmentAzure": {
@@ -199,7 +215,7 @@
     "environmentAzureCloud": "[variables('environmentAzure')]",
     "environmentAzureUSGovernment": "[variables('environmentAzure')]",
     "environmentAzureGermanCloud": "[variables('environmentAzure')]",
-
+    "environmentAzureStack": "[variables('environmentAzure')]",
     "environmentAzureChinaCloud": {
       "serviceHostBase": "[variables('coreUri')]",
       "secondaryDNS": "168.63.129.16",
@@ -231,6 +247,33 @@
       "dynamicCflinuxfs2ReleaseSha1": "665fdadc14d26cc150f64e80b7d3dc9d9450e2a2"
     },
     "environment": "[variables(concat('environment', parameters('environment')))]",
+
+    "customScriptPropertiesAzureCloud": {
+      "publisher": "Microsoft.Azure.Extensions",
+      "type": "CustomScript",
+      "typeHandlerVersion": "2.0",
+      "settings": {
+        "fileUris": "[variables('filesToDownload')]"
+      },
+      "protectedSettings": {
+        "commandToExecute": "[concat('bash -l -c \"./setup_env.sh', ' ', parameters('tenantID'), ' ', parameters('clientID'), ' ', base64(parameters('clientSecret')), ' >/home/', parameters('adminUsername'), '/install.log 2>&1\"')]"
+      }
+    },
+    "customScriptPropertiesAzureUSGovernment": "[variables('customScriptPropertiesAzureCloud')]",
+    "customScriptPropertiesAzureGermanCloud": "[variables('customScriptPropertiesAzureCloud')]",
+    "customScriptPropertiesAzureChinaCloud": "[variables('customScriptPropertiesAzureCloud')]",
+    "customScriptPropertiesAzureStack": {
+      "publisher": "Microsoft.OSTCExtensions",
+      "type": "CustomScriptForLinux",
+      "typeHandlerVersion": "1.5",
+      "settings": {
+        "fileUris": "[variables('filesToDownload')]"
+      },
+      "protectedSettings": {
+        "commandToExecute": "[concat('bash -l -c \"./setup_env.sh', ' ', parameters('tenantID'), ' ', parameters('clientID'), ' ', base64(parameters('clientSecret')), ' >/home/', parameters('adminUsername'), '/install.log 2>&1\"')]"
+      }
+    },
+    "customScriptProperties": "[variables(concat('customScriptProperties', parameters('environment')))]",
 
     "keepUnreachableVMs": "false"
   },
@@ -550,7 +593,9 @@
               "BOSH_INIT_URL": "[variables('environment').boshInitUrl]",
               "KEEP_UNREACHABLE_VMS": "[variables('keepUnreachableVMs')]",
               "AUTO_DEPLOY_BOSH": "[parameters('autoDeployBosh')]",
-              "BOSH_VM_SIZE": "[parameters('boshVmSize')]"
+              "BOSH_VM_SIZE": "[parameters('boshVmSize')]",
+              "AZURE_STACK_DOMAIN": "[parameters('azureStackDomain')]",
+              "AZURE_STACK_RESOURCE": "[parameters('azureStackResource')]"
             }
           }
         }
@@ -617,17 +662,7 @@
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
       ],
-      "properties": {
-        "publisher": "Microsoft.Azure.Extensions",
-        "type": "CustomScript",
-        "typeHandlerVersion": "2.0",
-        "settings": {
-          "fileUris": "[variables('filesToDownload')]"
-        },
-        "protectedSettings": {
-          "commandToExecute": "[concat('bash -l -c \"./setup_env.sh', ' ', parameters('tenantID'), ' ', parameters('clientID'), ' ', base64(parameters('clientSecret')), ' >/home/', parameters('adminUsername'), '/install.log 2>&1\"')]"
-        }
-      }
+      "properties": "[variables('customScriptProperties')]"
     }
   ],
   "outputs": {
