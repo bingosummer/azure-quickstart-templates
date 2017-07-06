@@ -7,6 +7,7 @@ import random
 import re
 import requests
 import sys
+import ruamel.yaml
 import base64
 from azure.storage.blob import AppendBlobService
 from azure.storage.table import TableService
@@ -103,9 +104,7 @@ def render_bosh_manifest(settings):
         "GATEWAY_IP",
         "BOSH_DIRECTOR_IP",
         "NTP_SERVERS",
-        "POSTGRES_ADDRESS",
-        "AZURE_STACK_RESOURCE",
-        "AZURE_STACK_DOMAIN"
+        "POSTGRES_ADDRESS"
     ]
     values = settings.copy()
     values["SSH_PUBLIC_KEY"] = ssh_public_key
@@ -113,8 +112,24 @@ def render_bosh_manifest(settings):
     values["BOSH_DIRECTOR_IP"] = bosh_director_ip
     values["NTP_SERVERS"] = ntp_servers
     values["POSTGRES_ADDRESS"] = postgres_address
-    
-    render_file("bosh.yml", keys, values)
+
+    manifest_file = "bosh.yml"
+    render_file(manifest_file, keys, values)
+
+    if environment == "AzureStack":
+        azure_stack_properties = {
+            "domain": str(values["AZURE_STACK_DOMAIN"]),
+            "authentication": "AzureAD",
+            "resource": str(values["AZURE_STACK_RESOURCE"]),
+            "endpoint_prefix": "management",
+            "skip_ssl_validation": True,
+            "use_http_to_access_storage_account": True
+        }
+        with open(manifest_file, "r") as conf:
+            manifest = ruamel.yaml.load(conf, ruamel.yaml.RoundTripLoader)
+        manifest['cloud_provider']['properties']['azure']['azure_stack'] = azure_stack_properties
+        with open(manifest_file, "w") as conf:
+            ruamel.yaml.dump(manifest, conf, ruamel.yaml.RoundTripDumper)
 
     return bosh_director_ip
 
@@ -146,15 +161,62 @@ def get_cloud_foundry_configuration(settings, bosh_director_ip):
     return config
 
 def render_cloud_foundry_manifest(settings, bosh_director_ip):
+    config = get_cloud_foundry_configuration(settings, bosh_director_ip)
     if settings["ENVIRONMENT"] == "AzureStack":
-        cloudfoundry_template = "multiple-vm-cf-on-azurestack.yml"
-        config = get_cloud_foundry_configuration(settings, bosh_director_ip)
-        render_file(cloudfoundry_template, config.keys(), config)
+        manifest_file = "multiple-vm-cf.yml"
+        update_cloud_foundry_manifest_for_azurestack(manifest_file)
+        render_file(manifest_file, config.keys(), config)
     else:
-        for scenario in ["single-vm-cf", "multiple-vm-cf"]:
-            cloudfoundry_template = "{0}.yml".format(scenario)
-            config = get_cloud_foundry_configuration(settings, bosh_director_ip)
-            render_file(cloudfoundry_template, config.keys(), config)
+        for manifest_file in ["single-vm-cf.yml", "multiple-vm-cf.yml"]:
+            render_file(manifest_file, config.keys(), config)
+
+def update_cloud_foundry_manifest_for_azurestack(manifest_file):
+    with open(manifest_file, "r") as conf:
+        manifest = ruamel.yaml.load(conf, ruamel.yaml.RoundTripLoader)
+    # Use smaller VM size
+    manifest["compilation"]["cloud_properties"]["instance_type"] = "Standard_A1"
+    for resource_pool in manifest["resource_pools"]:
+        if resource_pool["name"].startswith("cell"):
+            resource_pool["cloud_properties"]["instance_type"] = "Standard_A4"
+        else:
+            resource_pool["cloud_properties"]["instance_type"] = "Standard_A1"
+    # Use webdav as the blobstore since fog is not supported in AzureStack
+    webdav_config = {
+        "blobstore_timeout": 5,
+        "ca_cert": "REPLACE_WITH_BLOBSTORE_CA_CERT",
+        "password": "REPLACE_WITH_BLOBSTORE_PASSWORD",
+        "private_endpoint": "https://blobstore.service.cf.internal:4443",
+        "public_endpoint": "http://blobstore.REPLACE_WITH_SYSTEM_DOMAIN",
+        "username": "blobstore"
+    }
+    for item in ["buildpacks", "droplets", "packages", "resource_pool"]:
+        manifest["properties"]["cc"][item]["blobstore_type"] = "webdav"
+        manifest["properties"]["cc"][item]["fog_connection"] = None
+        manifest["properties"]["cc"][item]["webdav_config"] = webdav_config
+    for job in manifest["jobs"]:
+        if job["name"].startswith("blobstore"):
+            job["instances"] = 1
+    blobstore = {
+        "admin_users": [
+            {
+                "password": "REPLACE_WITH_BLOBSTORE_PASSWORD",
+                "username": "blobstore"
+            }
+        ],
+        "port": 8080,
+        "secure_link": {
+            "secret": "REPLACE_WITH_BLOBSTORE_SECRET"
+        },
+        "tls": {
+            "ca_cert": "REPLACE_WITH_BLOBSTORE_CA_CERT",
+            "cert": "REPLACE_WITH_BLOBSTORE_TLS_CERT",
+            "port": 4443,
+            "private_key": "REPLACE_WITH_BLOBSTORE_PRIVATE_KEY"
+        }
+    }
+    manifest["properties"]["blobstore"] = blobstore
+    with open(manifest_file, "w") as conf:
+        ruamel.yaml.dump(manifest, conf, ruamel.yaml.RoundTripDumper)
 
 def render_bosh_deployment_cmd(bosh_director_ip):
     keys = ["BOSH_DIRECOT_IP"]

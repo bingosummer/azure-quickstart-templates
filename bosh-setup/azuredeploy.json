@@ -8,6 +8,13 @@
         "description": "name of the vm, will be used as DNS Name for the Public IP used to access the Virtual Machine"
       }
     },
+    "ubuntuOSVersion": {
+      "type": "string",
+      "defaultValue": "14.04.5-LTS",
+      "metadata": {
+        "description": "OS version of Ubuntu"
+      }
+    },
     "adminUsername": {
       "type": "string",
       "metadata": {
@@ -132,7 +139,6 @@
     "devboxPrivateIPAddress": "10.0.0.100",
     "imagePublisher": "Canonical",
     "imageOffer": "UbuntuServer",
-    "ubuntuOSVersion": "14.04.3-LTS",
     "sshKeyPath": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
 
     "baseUriAzureCloud": "[parameters('_artifactsLocation')]",
@@ -146,7 +152,6 @@
       "[uri(variables('baseUriAzureCloud'), 'manifests/bosh.yml')]",
       "[uri(variables('baseUriAzureCloud'), 'manifests/single-vm-cf.yml')]",
       "[uri(variables('baseUriAzureCloud'), 'manifests/multiple-vm-cf.yml')]",
-      "[uri(variables('baseUriAzureCloud'), 'manifests/multiple-vm-cf-on-azurestack.yml')]",
       "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.23.1/cf-cli-installer_6.23.1_x86-64.deb",
       "https://storage.googleapis.com/golang/go1.7.3.linux-amd64.tar.gz",
       "https://github.com/square/certstrap/archive/v1.0.1.tar.gz"
@@ -633,7 +638,7 @@
           "imageReference": {
             "publisher": "[variables('imagePublisher')]",
             "offer": "[variables('imageOffer')]",
-            "sku": "[variables('ubuntuOSVersion')]",
+            "sku": "[parameters('ubuntuOSVersion')]",
             "version": "latest"
           },
           "osDisk": {
