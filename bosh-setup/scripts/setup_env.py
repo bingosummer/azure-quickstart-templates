@@ -116,6 +116,7 @@ def render_bosh_manifest(settings):
     manifest_file = "bosh.yml"
     render_file(manifest_file, keys, values)
 
+    environment = "AzureStack"
     if environment == "AzureStack":
         azure_stack_properties = {
             "domain": str(values["AZURE_STACK_DOMAIN"]),
@@ -162,13 +163,9 @@ def get_cloud_foundry_configuration(settings, bosh_director_ip):
 
 def render_cloud_foundry_manifest(settings, bosh_director_ip):
     config = get_cloud_foundry_configuration(settings, bosh_director_ip)
-    if settings["ENVIRONMENT"] == "AzureStack":
-        manifest_file = "multiple-vm-cf.yml"
-        update_cloud_foundry_manifest_for_azurestack(manifest_file)
-        render_file(manifest_file, config.keys(), config)
-    else:
-        for manifest_file in ["single-vm-cf.yml", "multiple-vm-cf.yml"]:
-            render_file(manifest_file, config.keys(), config)
+    manifest_file = "multiple-vm-cf.yml"
+    update_cloud_foundry_manifest_for_azurestack(manifest_file)
+    render_file(manifest_file, config.keys(), config)
 
 def update_cloud_foundry_manifest_for_azurestack(manifest_file):
     with open(manifest_file, "r") as conf:
@@ -216,6 +213,8 @@ def update_cloud_foundry_manifest_for_azurestack(manifest_file):
     }
     manifest["properties"]["blobstore"] = blobstore
     with open(manifest_file, "w") as conf:
+        ruamel.yaml.dump(manifest, conf, ruamel.yaml.RoundTripDumper)
+    with open("/home/azureuser/test.yml", "w") as conf:
         ruamel.yaml.dump(manifest, conf, ruamel.yaml.RoundTripDumper)
 
 def render_bosh_deployment_cmd(bosh_director_ip):
