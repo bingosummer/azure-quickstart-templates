@@ -15,6 +15,9 @@ import azure.mgmt.network
 from azure.common.credentials import ServicePrincipalCredentials
 from azure.mgmt.network import NetworkManagementClient, NetworkManagementClientConfiguration
 
+def my_represent_none(self, data):
+    return self.represent_scalar(u'tag:yaml.org,2002:null', u'null')
+
 def prepare_storage(settings):
     default_storage_account_name = settings["DEFAULT_STORAGE_ACCOUNT_NAME"]
     storage_access_key = settings["DEFAULT_STORAGE_ACCESS_KEY"]
@@ -127,10 +130,10 @@ def render_bosh_manifest(settings):
             "use_http_to_access_storage_account": True
         }
         with open(manifest_file, "r") as conf:
-            manifest = ruamel.yaml.load(conf, ruamel.yaml.RoundTripLoader)
+            manifest = ruamel.yaml.round_trip_load(conf)
         manifest['cloud_provider']['properties']['azure']['azure_stack'] = azure_stack_properties
         with open(manifest_file, "w") as conf:
-            ruamel.yaml.dump(manifest, conf, ruamel.yaml.RoundTripDumper)
+            ruamel.yaml.round_trip_dump(manifest, conf)
 
     return bosh_director_ip
 
@@ -169,7 +172,7 @@ def render_cloud_foundry_manifest(settings, bosh_director_ip):
 
 def update_cloud_foundry_manifest_for_azurestack(manifest_file):
     with open(manifest_file, "r") as conf:
-        manifest = ruamel.yaml.load(conf, ruamel.yaml.RoundTripLoader)
+        manifest = ruamel.yaml.round_trip_load(conf)
     # Use smaller VM size
     manifest["compilation"]["cloud_properties"]["instance_type"] = "Standard_A1"
     for resource_pool in manifest["resource_pools"]:
@@ -213,9 +216,9 @@ def update_cloud_foundry_manifest_for_azurestack(manifest_file):
     }
     manifest["properties"]["blobstore"] = blobstore
     with open(manifest_file, "w") as conf:
-        ruamel.yaml.dump(manifest, conf, ruamel.yaml.RoundTripDumper)
+        ruamel.yaml.round_trip_dump(manifest, conf)
     with open("/home/azureuser/test.yml", "w") as conf:
-        ruamel.yaml.dump(manifest, conf, ruamel.yaml.RoundTripDumper)
+        ruamel.yaml.round_trip_dump(manifest, conf)
 
 def render_bosh_deployment_cmd(bosh_director_ip):
     keys = ["BOSH_DIRECOT_IP"]
@@ -277,4 +280,5 @@ def main():
     render_cloud_foundry_deployment_cmd(settings)
 
 if __name__ == "__main__":
+    ruamel.yaml.RoundTripRepresenter.add_representer(type(None), my_represent_none)
     main()
