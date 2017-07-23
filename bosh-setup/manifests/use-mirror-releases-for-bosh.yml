@@ -1,0 +1,7 @@
+---
+- path: /releases/name=bosh/url
+  type: replace
+  value: https://mirror.azure.cn/bosh/bosh-compiled-release-tarballs/bosh-263.2.0-ubuntu-trusty-3445.7-20170915-052445-759948783-20170915052451.tgz%3FversionId%3D3kjVQuRK7JyrnbKEbKhLRi7qyo0wBXZJ
+- path: /releases/name=os-conf/url
+  type: replace
+  value: https://mirror.azure.cn/bosh/os-conf/os-conf-release-12.tgz
