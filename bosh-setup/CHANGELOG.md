@@ -1,3 +1,9 @@
+# v3.0.0 (2017-7-31)
+
+- Migrate [`cf-release`](https://github.com/cloudfoundry/cf-release) to [`cf-deployment`](https://github.com/cloudfoundry/cf-deployment).
+- `bosh-deployment` is based on the [commit](https://github.com/cloudfoundry/bosh-deployment/blob/9aa3798d3a9e89bcecd66cfebd70c733f0f9fc2b/bosh.yml).
+- `cf-deployment` is based on the [commit](https://github.com/cloudfoundry/cf-deployment/blob/0148c365d2e0906e85d836c3e67c854cfb6bd9c3/cf-deployment.yml).
+
 # v2.8.0 (2017-8-11)
 
 - Upgrade Azure CPI version to v26. Please see new features in [bosh-azure-cpi-release v26](https://github.com/cloudfoundry-incubator/bosh-azure-cpi-release/releases/tag/v26)
