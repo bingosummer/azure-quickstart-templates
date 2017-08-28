@@ -166,10 +166,11 @@ if [ "$environment" = "AzureChinaCloud" ]; then
   cat >> "$home_dir/deploy_cloud_foundry.sh" << EOF
 bosh -n -d cf deploy ~/example_manifests/cf-deployment.yml \\
   --vars-store=deployment-vars.yml \\
-  -v system_domain=$(get_setting CLOUD_FOUNDRY_PUBLIC_IP).xip.io \\
   -o ~/example_manifests/azure.yml \\
   -o ~/example_manifests/use-azure-storage-blobstore.yml \\
   -o ~/example_manifests/use-mirror-releases.yml \\
+  -o ~/example_manifests/scale-to-one-az.yml \\
+  -v system_domain=$(get_setting CLOUD_FOUNDRY_PUBLIC_IP).xip.io \\
   -v environment=$(get_setting ENVIRONMENT) \\
   -v blobstore_storage_account_name=$(get_setting DEFAULT_STORAGE_ACCOUNT_NAME) \\
   -v blobstore_storage_access_key=$(get_setting DEFAULT_STORAGE_ACCESS_KEY) \\
@@ -182,17 +183,19 @@ elif [ "$environment" = "AzureStack" ]; then
   cat >> "$home_dir/deploy_cloud_foundry.sh" << EOF
 bosh -n -d cf deploy ~/example_manifests/cf-deployment.yml \\
   --vars-store=deployment-vars.yml \\
-  -v system_domain=$(get_setting CLOUD_FOUNDRY_PUBLIC_IP).xip.io \\
   -o ~/example_manifests/azure-stack.yml \\
-  -o ~/example_manifests/scale-to-one-az.yml
+  -o ~/example_manifests/scale-to-one-az.yml \\
+  -o ~/example_manifests/scale-to-availability-set-no-HA.yml \\
+  -v system_domain=$(get_setting CLOUD_FOUNDRY_PUBLIC_IP).xip.io
 EOF
 else
   cat >> "$home_dir/deploy_cloud_foundry.sh" << EOF
 bosh -n -d cf deploy ~/example_manifests/cf-deployment.yml \\
   --vars-store=deployment-vars.yml \\
-  -v system_domain=$(get_setting CLOUD_FOUNDRY_PUBLIC_IP).xip.io \\
   -o ~/example_manifests/azure.yml \\
   -o ~/example_manifests/use-azure-storage-blobstore.yml \\
+  -o ~/example_manifests/scale-to-one-az.yml \\
+  -v system_domain=$(get_setting CLOUD_FOUNDRY_PUBLIC_IP).xip.io \\
   -v environment=$(get_setting ENVIRONMENT) \\
   -v blobstore_storage_account_name=$(get_setting DEFAULT_STORAGE_ACCOUNT_NAME) \\
   -v blobstore_storage_access_key=$(get_setting DEFAULT_STORAGE_ACCESS_KEY) \\

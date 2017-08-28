@@ -12,7 +12,7 @@ def prepare_storage_account(storage_account_name, storage_access_key, endpoint_s
         public_access='blob'
     )
 
-    # Prepare the table for storing meta datas of storage account and stemcells
+    # Prepare the table for storing metadata of storage account and stemcells
     table_service = TableService(account_name=storage_account_name, account_key=storage_access_key, endpoint_suffix=endpoint_suffix, protocol=protocol)
     table_service.create_table('stemcells')
 
