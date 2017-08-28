@@ -119,6 +119,7 @@ bosh create-env ~/example_manifests/bosh.yml \\
   --vars-store=creds.yml \\
   -o ~/example_manifests/cpi.yml \\
   -o ~/example_manifests/custom-environment.yml \\
+  -o ~/example_manifests/use-managed-disks.yml \\
   -o ~/example_manifests/jumpbox-user.yml \\
   -v director_name=azure \\
   -v internal_cidr=10.0.0.0/24 \\
