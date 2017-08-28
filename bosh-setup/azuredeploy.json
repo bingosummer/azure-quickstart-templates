@@ -229,7 +229,7 @@
       "serviceHostBase": "[variables('coreUri')]",
       "boshAzureCPIReleaseUrl": "https://mirror.azure.cn/bosh/bosh-azure-cpi-release/bosh-azure-cpi-release-26.tgz",
       "boshAzureCPIReleaseSha1": "28c1a389ef22d820954b076e3a0cc1e71d4abbe4",
-      "boshCliUrl": "https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.28-linux-amd64",
+      "boshCliUrl": "[uri(variables('baseUriAzureChinaCloud'), 'bosh-cli/bosh-cli-2.0.28-linux-amd64')]",
       "stemcellUrl": "https://mirror.azure.cn/bosh/bosh-azure-stemcells/bosh-stemcell-3421.11-azure-hyperv-ubuntu-trusty-go_agent.tgz",
       "stemcellSha1": "fe6fe64a6ce22e1b0be6f5e493dbac67fdd33546"
     },
