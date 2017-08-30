@@ -67,8 +67,7 @@ chmod 775 $manifests_dir
 chmod 644 $manifests_dir/*
 dpkg -i cf-cli*
 
-if [ "$environment" = "AzureStack" ]; then
-  cat > "$home_dir/deploy_bosh.sh" << EOF
+cat > "$home_dir/deploy_bosh.sh" << EOF
 #!/usr/bin/env bash
 
 set -e
@@ -81,46 +80,26 @@ bosh create-env ~/example_manifests/bosh.yml \\
   --vars-store=creds.yml \\
   -o ~/example_manifests/cpi.yml \\
   -o ~/example_manifests/custom-environment.yml \\
-  -o ~/example_manifests/azure-stack-properties.yml \\
   -o ~/example_manifests/jumpbox-user.yml \\
-  -v director_name=azure \\
-  -v internal_cidr=10.0.0.0/24 \\
-  -v internal_gw=10.0.0.1 \\
-  -v internal_ip=10.0.0.4 \\
-  -v cpi_release_url=$(get_setting BOSH_AZURE_CPI_RELEASE_URL) \\
-  -v cpi_release_sha1=$(get_setting BOSH_AZURE_CPI_RELEASE_SHA1) \\
-  -v stemcell_url=$(get_setting STEMCELL_URL) \\
-  -v stemcell_sha1=$(get_setting STEMCELL_SHA1) \\
-  -v director_vm_instance_type=$(get_setting BOSH_VM_SIZE) \\
-  -v vnet_name=$(get_setting VNET_NAME) \\
-  -v subnet_name=$(get_setting SUBNET_NAME_FOR_BOSH) \\
-  -v environment=$(get_setting ENVIRONMENT) \\
-  -v subscription_id=$(get_setting SUBSCRIPTION_ID) \\
-  -v tenant_id=${tenant_id} \\
-  -v client_id=${client_id} \\
-  -v client_secret="${client_secret}" \\
-  -v resource_group_name=$(get_setting RESOURCE_GROUP_NAME) \\
+EOF
+
+if [ "$environment" = "AzureChinaCloud" ]; then
+  cat >> "$home_dir/deploy_bosh.sh" << EOF
+  -o ~/example_manifests/use-managed-disks.yml \\
+  -o ~/example_manifests/use-mirror-releases-for-bosh.yml \\
+EOF
+elif [ "$environment" = "AzureStack" ]; then 
+  cat >> "$home_dir/deploy_bosh.sh" << EOF
+  -o ~/example_manifests/azure-stack-properties.yml \\
   -v storage_account_name=$(get_setting DEFAULT_STORAGE_ACCOUNT_NAME) \\
-  -v default_security_group=$(get_setting NSG_NAME_FOR_BOSH) \\
-  -v azure_stack_domain=$(get_setting AZURE_STACK_DOMAIN) \\
-  -v azure_stack_resource=$(get_setting AZURE_STACK_RESOURCE)
 EOF
 else
-  cat > "$home_dir/deploy_bosh.sh" << EOF
-#!/usr/bin/env bash
-
-set -e
-
-export BOSH_LOG_LEVEL="debug"
-export BOSH_LOG_PATH="./run.log"
-
-bosh create-env ~/example_manifests/bosh.yml \\
-  --state=state.json \\
-  --vars-store=creds.yml \\
-  -o ~/example_manifests/cpi.yml \\
-  -o ~/example_manifests/custom-environment.yml \\
+  cat >> "$home_dir/deploy_bosh.sh" << EOF
   -o ~/example_manifests/use-managed-disks.yml \\
-  -o ~/example_manifests/jumpbox-user.yml \\
+EOF
+fi
+
+cat >> "$home_dir/deploy_bosh.sh" << EOF
   -v director_name=azure \\
   -v internal_cidr=10.0.0.0/24 \\
   -v internal_gw=10.0.0.1 \\
@@ -138,10 +117,8 @@ bosh create-env ~/example_manifests/bosh.yml \\
   -v client_id=${client_id} \\
   -v client_secret="${client_secret}" \\
   -v resource_group_name=$(get_setting RESOURCE_GROUP_NAME) \\
-  -v storage_account_name=$(get_setting DEFAULT_STORAGE_ACCOUNT_NAME) \\
   -v default_security_group=$(get_setting NSG_NAME_FOR_BOSH)
 EOF
-fi
 
 cat > "$home_dir/deploy_cloud_foundry.sh" << EOF
 export BOSH_ENVIRONMENT=10.0.0.4
@@ -169,7 +146,7 @@ bosh -n -d cf deploy ~/example_manifests/cf-deployment.yml \\
   --vars-store=deployment-vars.yml \\
   -o ~/example_manifests/azure.yml \\
   -o ~/example_manifests/use-azure-storage-blobstore.yml \\
-  -o ~/example_manifests/use-mirror-releases.yml \\
+  -o ~/example_manifests/use-mirror-releases-for-cf.yml \\
   -o ~/example_manifests/scale-to-one-az.yml \\
   -v system_domain=$(get_setting CLOUD_FOUNDRY_PUBLIC_IP).xip.io \\
   -v environment=$(get_setting ENVIRONMENT) \\
