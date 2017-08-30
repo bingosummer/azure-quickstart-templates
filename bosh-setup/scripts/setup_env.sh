@@ -184,7 +184,7 @@ elif [ "$environment" = "AzureStack" ]; then
   cat >> "$home_dir/deploy_cloud_foundry.sh" << EOF
 bosh -n -d cf deploy ~/example_manifests/cf-deployment.yml \\
   --vars-store=deployment-vars.yml \\
-  -o ~/example_manifests/azure-stack.yml \\
+  -o ~/example_manifests/azure.yml \\
   -o ~/example_manifests/scale-to-one-az.yml \\
   -o ~/example_manifests/scale-to-availability-set-no-HA.yml \\
   -v system_domain=$(get_setting CLOUD_FOUNDRY_PUBLIC_IP).xip.io
