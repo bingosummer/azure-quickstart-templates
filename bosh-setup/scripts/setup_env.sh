@@ -35,7 +35,7 @@ environment=$(get_setting ENVIRONMENT)
 set +e
 
 echo "Start to install python packages..."
-pkg_list="pip==1.5.4 setuptools==32.3.1 azure==2.0.0rc1"
+pkg_list="setuptools==32.3.1 azure==2.0.0rc1"
 if [ "$environment" = "AzureChinaCloud" ]; then
   for pkg in $pkg_list; do
     retryop "pip install $pkg --index-url https://mirror.azure.cn/pypi/simple/ --default-timeout=60"
