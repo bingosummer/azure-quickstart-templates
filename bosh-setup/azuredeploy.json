@@ -197,6 +197,7 @@
       "[uri(variables('baseUriAzureChinaCloudWithVersion'), 'manifests/use-managed-disks.yml')]",
       "[uri(variables('baseUriAzureChinaCloudWithVersion'), 'manifests/jumpbox-user.yml')]",
       "[uri(variables('baseUriAzureChinaCloudWithVersion'), 'manifests/use-mirror-releases-for-bosh.yml')]",
+      "[uri(variables('baseUriAzureChinaCloudWithVersion'), 'manifests/custom-ntp-server.yml')]",
       "[uri(variables('baseUriAzureChinaCloudWithVersion'), 'manifests/cloud-config.yml')]",
       "[uri(variables('baseUriAzureChinaCloudWithVersion'), 'manifests/cf-deployment.yml')]",
       "[uri(variables('baseUriAzureChinaCloudWithVersion'), 'manifests/azure.yml')]",

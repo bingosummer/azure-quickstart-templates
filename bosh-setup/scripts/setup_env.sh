@@ -87,6 +87,7 @@ if [ "$environment" = "AzureChinaCloud" ]; then
   cat >> "$home_dir/deploy_bosh.sh" << EOF
   -o ~/example_manifests/use-managed-disks.yml \\
   -o ~/example_manifests/use-mirror-releases-for-bosh.yml \\
+  -o ~/example_manifests/custom-ntp-server.yml \\
 EOF
 elif [ "$environment" = "AzureStack" ]; then 
   cat >> "$home_dir/deploy_bosh.sh" << EOF
