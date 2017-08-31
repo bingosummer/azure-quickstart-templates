@@ -24,7 +24,7 @@ function get_setting() {
 
 function install_bosh_cli() {
   echo "Start to install bosh-cli v2..."
-  bosh_cli_url=$2
+  bosh_cli_url=$1
   wget $bosh_cli_url
   chmod +x ./bosh-cli-*
   sudo mv ./bosh-cli-* /usr/local/bin/bosh
@@ -55,7 +55,7 @@ endpoint_suffix=$(get_setting SERVICE_HOST_BASE)
 python prepare_storage_account.py ${default_storage_account} ${default_storage_access_key} ${endpoint_suffix} ${environment}
 
 bosh_cli_url=$(get_setting BOSH_CLI_URL)
-install_bosh_cli $environment $bosh_cli_url
+install_bosh_cli $bosh_cli_url
 
 username=$(get_setting ADMIN_USER_NAME)
 home_dir="/home/$username"
