@@ -216,8 +216,8 @@
 
     "environmentAzure": {
       "serviceHostBase": "[variables('coreUri')]",
-      "boshAzureCPIReleaseUrl": "https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-azure-cpi-release?v=26",
-      "boshAzureCPIReleaseSha1": "28c1a389ef22d820954b076e3a0cc1e71d4abbe4",
+      "boshAzureCPIReleaseUrl": "https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-azure-cpi-release?v=27",
+      "boshAzureCPIReleaseSha1": "3174ed9900d8557e7df6599019d11a49b84b96b9",
       "boshCliUrl": "https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.28-linux-amd64",
       "stemcellUrl": "https://bosh.io/d/stemcells/bosh-azure-hyperv-ubuntu-trusty-go_agent?v=3421.11",
       "stemcellSha1": "fe6fe64a6ce22e1b0be6f5e493dbac67fdd33546"
@@ -228,8 +228,8 @@
     "environmentAzureStack": "[variables('environmentAzure')]",
     "environmentAzureChinaCloud": {
       "serviceHostBase": "[variables('coreUri')]",
-      "boshAzureCPIReleaseUrl": "https://mirror.azure.cn/bosh/bosh-azure-cpi-release/bosh-azure-cpi-release-26.tgz",
-      "boshAzureCPIReleaseSha1": "28c1a389ef22d820954b076e3a0cc1e71d4abbe4",
+      "boshAzureCPIReleaseUrl": "https://mirror.azure.cn/bosh/bosh-azure-cpi-release/bosh-azure-cpi-release-27.tgz",
+      "boshAzureCPIReleaseSha1": "3174ed9900d8557e7df6599019d11a49b84b96b9",
       "boshCliUrl": "[uri(variables('baseUriAzureChinaCloud'), 'bosh-cli/bosh-cli-2.0.28-linux-amd64')]",
       "stemcellUrl": "https://mirror.azure.cn/bosh/bosh-azure-stemcells/bosh-stemcell-3421.11-azure-hyperv-ubuntu-trusty-go_agent.tgz",
       "stemcellSha1": "fe6fe64a6ce22e1b0be6f5e493dbac67fdd33546"
