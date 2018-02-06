@@ -477,13 +477,15 @@
       }
     },
     {
-      "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('defaultStorageAccountName')]",
-      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2017-10-01",
+      "sku": {
+        "name": "[variables('storageAccountType')]"
+      },
+      "kind": "StorageV2",
       "location": "[resourceGroup().location]",
-      "properties": {
-        "accountType": "[variables('storageAccountType')]"
-      }
+      "properties": {}
     },
     {
       "apiVersion": "2015-06-15",
