@@ -235,7 +235,7 @@
     "filesToDownloadAzureCloud": "[variables('filesToDownloadAzure')]",
     "filesToDownloadAzureUSGovernment": "[variables('filesToDownloadAzure')]",
     "filesToDownloadAzureGermanCloud": "[variables('filesToDownloadAzure')]",
-    "filesToDownloadAzureStack": "[union(variables('filesToDownloadShared'), createArray(uri(variables('baseUriAzureCloud'), 'manifests/azure-stack-properties.yml')))]",
+    "filesToDownloadAzureStack": "[union(variables('filesToDownloadShared'), createArray(uri(variables('baseUriAzureCloud'), 'manifests/azure-stack-properties.yml'), uri(variables('baseUriAzureCloud'), 'manifests/cf-deployment-small-footprint.yml')))]",
     "baseUriAzureChinaCloud": "https://cloudfoundry.blob.core.chinacloudapi.cn/bosh-setup/",
     "templateVersion": "v3-8-0",
     "baseUriAzureChinaCloudWithVersion": "[concat(variables('baseUriAzureChinaCloud'), variables('templateVersion'), '/')]",
