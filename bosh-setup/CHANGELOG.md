@@ -1,3 +1,8 @@
+# v3.9.0 (2018-05-24)
+
+- Bump cf-deployment to [v1.36.0](https://github.com/cloudfoundry/cf-deployment/tree/v1.36.0)
+- Update the signing key for installing azure-cli
+
 # v3.8.0 (2018-05-14)
 
 - Bump cf-deployment to [v1.31.0](https://github.com/cloudfoundry/cf-deployment/tree/v1.31.0)
