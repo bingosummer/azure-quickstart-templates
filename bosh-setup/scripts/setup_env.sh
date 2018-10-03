@@ -27,7 +27,7 @@ function client_secret_or_certificate() {
 
 # https://bosh.io/docs/cli-v2-install/#additional-dependencies
 echo "Installing OS specified dependencies for bosh create-env command"
-retryop "apt-get update && apt-get install -y build-essential zlibc zlib1g-dev ruby ruby-dev openssl libxslt-dev libxml2-dev libssl-dev libreadline6 libreadline6-dev libyaml-dev libsqlite3-dev sqlite3"
+#retryop "apt-get update && apt-get install -y build-essential zlibc zlib1g-dev ruby ruby-dev openssl libxslt-dev libxml2-dev libssl-dev libreadline6 libreadline6-dev libyaml-dev libsqlite3-dev sqlite3"
 
 echo "Installing BOSH CLI"
 bosh_cli_url=$(get_setting BOSH_CLI_URL)
